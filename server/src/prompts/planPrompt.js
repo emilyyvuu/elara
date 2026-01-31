@@ -1,4 +1,8 @@
-export function planPrompt(profile) {
+/**
+ * Generate a fitness and nutrition plan prompt based on user profile and daily check-in.
+ */
+export function planPrompt(profile, checkIn) {
+  const dailyPulse = checkIn ? JSON.stringify(checkIn, null, 2) : "Baseline";
   return `
 You are a cycle-aware fitness and nutrition coach. Create safe, practical guidance.
 
@@ -13,6 +17,9 @@ Return VALID JSON ONLY in this shape:
 
 User profile:
 ${JSON.stringify(profile, null, 2)}
+
+Daily pulse:
+${dailyPulse}
 
 Rules:
 - Be cycle-phase aware (follicular/ovulation/luteal/menstrual).

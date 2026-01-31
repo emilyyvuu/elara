@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoutes from "./src/routes/auth.routes.js";
 import planRoutes from "./src/routes/plan.routes.js";
+import profileRoutes from "./src/routes/profile.routes.js";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(cookieParser());
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
 app.use("/api/auth", authRoutes);
+app.use("/api", profileRoutes);
 app.use("/api", planRoutes);
 
 const PORT = process.env.PORT || 5174;

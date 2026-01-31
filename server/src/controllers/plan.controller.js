@@ -1,14 +1,25 @@
-import { validateProfile } from "../utils/validateProfile.js";
+import User from "../models/User.js";
 import { buildPlan } from "../services/plan.service.js";
 
 export async function generatePlan(req, res) {
   try {
-    const profile = req.body?.profile;
-    const { ok, errors, sanitized } = validateProfile(profile);
+    const { checkIn } = req.body || {};
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (!ok) return res.status(400).json({ error: "Invalid profile", errors });
+    const profile = {
+      height: user.height ?? null,
+      weight: user.weight ?? null,
+      goals: user.goals || [],
+      equipment: user.equipment || "None",
+      cycleTracking: user.cycleTracking || false,
+      cycleDetails: user.cycleDetails || null,
+    };
 
-    const plan = await buildPlan(sanitized);
+    const plan = await buildPlan(profile, checkIn);
+    user.currentPlan = plan;
+    await user.save();
+
     return res.json(plan);
   } catch (err) {
     console.error(err);

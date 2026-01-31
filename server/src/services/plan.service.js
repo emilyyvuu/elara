@@ -1,8 +1,11 @@
 import { planPrompt } from "../prompts/planPrompt.js";
 import { generateJson } from "./gemini.service.js";
 
-export async function buildPlan(profile) {
-  const prompt = planPrompt(profile);
+/**
+ * Build a personalized fitness and nutrition plan based on user profile and daily check-in.
+ */
+export async function buildPlan(profile, checkIn) {
+  const prompt = planPrompt(profile, checkIn);
 
   const text = await generateJson("gemini-1.5-flash", prompt);
 
