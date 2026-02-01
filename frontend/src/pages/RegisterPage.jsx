@@ -36,7 +36,7 @@ export default function RegisterPage() {
       <div className="auth-card">
         <div className="auth-header">
           <p className="auth-kicker">Start your plan</p>
-          <h1 className="auth-title">Create your Violet account</h1>
+          <h1 className="auth-title">Create your Elara account</h1>
           <p className="auth-subtitle">
             Get personalized training, meals, and insights in minutes.
           </p>

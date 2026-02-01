@@ -20,15 +20,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fffced;
-  background: linear-gradient(
-    160deg,
-    rgba(255, 252, 237, 1) 10%,
-    rgba(190, 214, 255, 1) 50%,
-    rgba(142, 177, 237, 1) 100%
-  );
-  background-size: 260% 260%;
-  animation: landing-gradient 3s ease-in-out infinite;
+  background: linear-gradient(161deg,#fffced,#96b8f3,#d3aee9);
+  background-size: 240% 240%;
+  animation: landing-gradient 16s ease infinite;
   font-family: "LexendDeca", "Libre Baskerville", Georgia, serif;
 
 }

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { getProfile, updateProfile } from "../api/profileApi";
 import { generatePlan } from "../api/planApi";
+import LogoutButton from "../components/LogoutButton";
 import "../styles/appPages.css";
 
 export default function ProfilePage() {
@@ -92,6 +93,12 @@ export default function ProfilePage() {
   return (
     <div className="page-container">
       <div className="page-card">
+        <div className="page-top-actions">
+          <Link className="btn primary" to="/dashboard">
+            Dashboard
+          </Link>
+          <LogoutButton />
+        </div>
         <h1 className="page-title">Profile</h1>
         <p className="page-subtitle">Update your baseline settings.</p>
 

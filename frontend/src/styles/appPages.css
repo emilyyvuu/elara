@@ -58,6 +58,15 @@
   z-index: 1;
 }
 
+.page-top-actions {
+  position: absolute;
+  top: 2rem;
+  right: 2.25rem;
+  z-index: 2;
+  display: flex;
+  gap: 0.75rem;
+}
+
 .page-title {
   font-family: "Wagon", "Libre Baskerville", Georgia, serif;
   font-size: 3rem;
@@ -65,8 +74,59 @@
 }
 
 .page-subtitle {
-  margin: 0 0 1.75rem;
+  margin: 0 0 1rem;
   font-size: 1.1rem;
+}
+
+.label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #4e5ba8;
+}
+
+.toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toggle-track {
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(78, 91, 168, 0.25);
+  border: 1px solid rgba(78, 91, 168, 0.35);
+  position: relative;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.toggle-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ffffff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.toggle-switch input:checked + .toggle-track {
+  background: rgba(78, 91, 168, 0.55);
+  border-color: rgba(78, 91, 168, 0.6);
+}
+
+.toggle-switch input:checked + .toggle-track .toggle-thumb {
+  transform: translateX(20px);
 }
 
 .form-grid {
@@ -93,6 +153,29 @@
   padding: 0.7rem 0.9rem;
   font-size: 0.95rem;
   background: rgba(255, 255, 255, 0.8);
+  margin-top: 0.5rem;
+}
+
+.form-row input[type="range"] {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.range-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.range-label {
+  font-size: 0.85rem;
+  color: #4e5ba8;
+}
+
+.range-input {
+  flex: 1;
+  accent-color: #4e5ba8;
 }
 
 .form-actions {
@@ -104,12 +187,6 @@
 .btn.primary {
   background: #4e5ba8;
   color: white;
-}
-
-.btn.secondary {
-  background: rgba(255, 255, 255, 0.8);
-  color: #4e5ba8;
-  border: 1px solid rgba(78, 91, 168, 0.35);
 }
 
 .card-grid {

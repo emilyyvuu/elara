@@ -11,17 +11,42 @@ export default function OnboardPage() {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    fullName: "",
     height: "",
     weight: "",
+    heightFeet: "",
+    heightInches: "",
     goalsText: "",
     dietaryNeedsText: "",
     equipment: "None",
     cycleTracking: false,
     lastPeriodDate: "",
   });
+  const [unitSystem, setUnitSystem] = useState("metric");
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+
+  const toggleUnits = () => {
+    setForm((prev) => {
+      if (unitSystem === "metric") {
+        const totalInches = prev.height ? Number(prev.height) / 2.54 : 0;
+        const feet = Math.floor(totalInches / 12);
+        const inches = totalInches ? (totalInches % 12).toFixed(1) : "";
+        const weightLb = prev.weight ? (Number(prev.weight) * 2.20462).toFixed(1) : "";
+        return {
+          ...prev,
+          heightFeet: totalInches ? String(feet) : "",
+          heightInches: inches,
+          weight: weightLb,
+        };
+      }
+      const feet = Number(prev.heightFeet) || 0;
+      const inches = Number(prev.heightInches) || 0;
+      const heightCm = feet || inches ? ((feet * 12 + inches) * 2.54).toFixed(1) : "";
+      const weightKg = prev.weight ? (Number(prev.weight) / 2.20462).toFixed(1) : "";
+      return { ...prev, height: heightCm, weight: weightKg };
+    });
+    setUnitSystem((prev) => (prev === "metric" ? "imperial" : "metric"));
+  };
 
   const handleNext = () => setStep((prev) => Math.min(prev + 1, steps.length - 1));
   const handleBack = () => setStep((prev) => Math.max(prev - 1, 0));
@@ -30,19 +55,28 @@ export default function OnboardPage() {
     event.preventDefault();
     setLoading(true);
 
-    const [firstName, ...rest] = form.fullName.trim().split(/\s+/);
-    const lastName = rest.join(" ");
     const goals = form.goalsText.split(",").map((g) => g.trim()).filter(Boolean);
     const dietaryNeeds = form.dietaryNeedsText
       .split(",")
       .map((g) => g.trim())
       .filter(Boolean);
 
+    const heightValue = form.height ? Number(form.height) : null;
+    const weightValue = form.weight ? Number(form.weight) : null;
+    const imperialHeightInches =
+      (Number(form.heightFeet) || 0) * 12 + (Number(form.heightInches) || 0);
+    const height = unitSystem === "imperial"
+      ? imperialHeightInches
+        ? Number((imperialHeightInches * 2.54).toFixed(1))
+        : null
+      : heightValue;
+    const weight = unitSystem === "imperial" && weightValue != null
+      ? Number((weightValue / 2.20462).toFixed(1))
+      : weightValue;
+
     const payload = {
-      firstName: firstName || "",
-      lastName,
-      height: form.height ? Number(form.height) : null,
-      weight: form.weight ? Number(form.weight) : null,
+      height,
+      weight,
       goals,
       dietaryNeeds,
       equipment: form.equipment,
@@ -68,30 +102,55 @@ export default function OnboardPage() {
         <p className="page-subtitle">
           Step {step + 1} of {steps.length}: {steps[step]}
         </p>
-
         <form className="form-grid" onSubmit={handleFinish}>
           {step === 0 ? (
             <>
               <div className="form-row">
-                <label htmlFor="fullName">Full name</label>
-                <input
-                  id="fullName"
-                  value={form.fullName}
-                  onChange={(e) => update("fullName", e.target.value)}
-                  placeholder="Jane Doe"
-                />
+                <label className="label-row">
+                  Height ({unitSystem === "metric" ? "cm" : "ft / in"}) (optional)
+                  <span className="toggle-switch">
+                    <span>cm/kg</span>
+                    <input
+                      type="checkbox"
+                      checked={unitSystem === "imperial"}
+                      onChange={toggleUnits}
+                    />
+                    <span className="toggle-track">
+                      <span className="toggle-thumb" />
+                    </span>
+                    <span>ft/lb</span>
+                  </span>
+                </label>
+                {unitSystem === "metric" ? (
+                  <input
+                    id="height"
+                    type="number"
+                    value={form.height}
+                    onChange={(e) => update("height", e.target.value)}
+                  />
+                ) : (
+                  <div style={{ display: "flex", gap: "0.75rem" }}>
+                    <input
+                      id="heightFeet"
+                      type="number"
+                      placeholder="ft"
+                      value={form.heightFeet}
+                      onChange={(e) => update("heightFeet", e.target.value)}
+                    />
+                    <input
+                      id="heightInches"
+                      type="number"
+                      placeholder="in"
+                      value={form.heightInches}
+                      onChange={(e) => update("heightInches", e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
               <div className="form-row">
-                <label htmlFor="height">Height (optional)</label>
-                <input
-                  id="height"
-                  type="number"
-                  value={form.height}
-                  onChange={(e) => update("height", e.target.value)}
-                />
-              </div>
-              <div className="form-row">
-                <label htmlFor="weight">Weight (optional)</label>
+                <label htmlFor="weight">
+                  Weight ({unitSystem === "metric" ? "kg" : "lb"}) (optional)
+                </label>
                 <input
                   id="weight"
                   type="number"

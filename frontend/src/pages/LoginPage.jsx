@@ -36,7 +36,7 @@ export default function LoginPage() {
       <div className="auth-card">
         <div className="auth-header">
           <p className="auth-kicker">Welcome back</p>
-          <h1 className="auth-title">Log in to Violet</h1>
+          <h1 className="auth-title">Log in to Elara</h1>
           <p className="auth-subtitle">
             Pick up where you left off with your cycle-aware plan.
           </p>
