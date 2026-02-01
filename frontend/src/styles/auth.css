@@ -14,7 +14,8 @@
   background: #fffced;
   background: linear-gradient(167deg, rgba(255, 252, 237, 1) 21%, rgba(142, 177, 237, 1) 100%);
   font-family: "LexendDeca", "Libre Baskerville", Georgia, serif;
-  padding: 3rem 1.5rem;
+  box-sizing: border-box;
+  padding: 2rem 1.5rem;
 }
 
 .auth-card {

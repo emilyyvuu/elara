@@ -16,15 +16,26 @@
 }
 
 .page-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #fffced;
   background: linear-gradient(167deg, rgba(255, 252, 237, 1) 21%, rgba(142, 177, 237, 1) 100%);
   font-family: "LexendDeca", "Libre Baskerville", Georgia, serif;
-  padding: 3.5rem 1.5rem;
+  box-sizing: border-box;
+  padding: 2.5rem 1.5rem;
   color: #4e5ba8;
+}
+
+.scrollable-page {
+  height: auto;
+  min-height: 100vh;
+  align-items: flex-start;
+}
+
+.scrollable-card {
+  margin: 2.5rem 0;
 }
 
 .page-card {
@@ -220,6 +231,10 @@
 .btn.primary {
   background: #4e5ba8;
   color: white;
+}
+
+.page-top-actions .btn {
+  text-decoration: none;
 }
 
 .card-grid {

@@ -9,7 +9,7 @@ export default function AuthButtons() {
         className="btn primary"
         onClick={() => navigate("/login")}
       >
-        Log In
+        Login
       </button>
 
       <button

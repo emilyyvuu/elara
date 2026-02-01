@@ -16,7 +16,7 @@
 }
 /* Full-page center */
 .landing-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,6 +24,8 @@
   background-size: 240% 240%;
   animation: landing-gradient 16s ease infinite;
   font-family: "LexendDeca", "Libre Baskerville", Georgia, serif;
+  box-sizing: border-box;
+  padding: 2rem 1.5rem;
 
 }
 
@@ -84,6 +86,7 @@
   border: none;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  font-family: "LexendDeca", "Libre Baskerville", Georgia, serif;
 }
 
 .btn:hover {

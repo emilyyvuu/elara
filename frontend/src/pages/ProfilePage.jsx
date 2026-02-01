@@ -91,8 +91,8 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="page-container">
-      <div className="page-card">
+    <div className="page-container scrollable-page">
+      <div className="page-card scrollable-card">
         <div className="page-top-actions">
           <Link className="btn primary" to="/dashboard">
             Dashboard
