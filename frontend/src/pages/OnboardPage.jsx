@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateProfile } from "../api/profileApi";
-import { generatePlan } from "../api/planApi";
 import "../styles/appPages.css";
 
 const steps = ["Basic stats", "Goals & environment", "Bio-toggle"];
@@ -27,12 +26,7 @@ export default function OnboardPage() {
   const handleNext = () => setStep((prev) => Math.min(prev + 1, steps.length - 1));
   const handleBack = () => setStep((prev) => Math.max(prev - 1, 0));
 
-  const handleFinish = async (event) => {
-    event.preventDefault();
-    if (step < steps.length - 1) {
-      handleNext();
-      return;
-    }
+  const handleFinish = async () => {
     setLoading(true);
     setError("");
 
@@ -60,12 +54,21 @@ export default function OnboardPage() {
 
     try {
       await updateProfile(payload);
-      await generatePlan();
-      navigate("/dashboard");
+      navigate("/plan-loading");
     } catch (err) {
       setError(err?.message || "Failed to finish onboarding");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    if (step < steps.length - 1) {
+      handleNext();
+    } else {
+      handleFinish();
     }
   };
 
@@ -77,7 +80,7 @@ export default function OnboardPage() {
           Step {step + 1} of {steps.length}: {steps[step]}
         </p>
 
-        <form className="form-grid" onSubmit={handleFinish}>
+        <form className="form-grid" onSubmit={(event) => event.preventDefault()} onKeyDown={handleKeyDown}>
           {step === 0 ? (
             <>
               <div className="form-row">
@@ -183,7 +186,7 @@ export default function OnboardPage() {
                 Next
               </button>
             ) : (
-              <button className="btn primary" type="submit" disabled={loading}>
+              <button className="btn primary" type="button" onClick={handleFinish} disabled={loading}>
                 {loading ? "Saving..." : "Finish onboarding"}
               </button>
             )}
