@@ -38,7 +38,7 @@ export default function LoginPage() {
           <p className="auth-kicker">Welcome back</p>
           <h1 className="auth-title">Log in to Elara</h1>
           <p className="auth-subtitle">
-            Pick up where you left off with your cycle-aware plan.
+           Continue your personalized fitness and nutrition journey.
           </p>
         </div>
 
