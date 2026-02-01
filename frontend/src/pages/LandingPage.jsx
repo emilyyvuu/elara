@@ -7,7 +7,7 @@ export default function LandingPage() {
       <div className="landing-card">
         <h1 className="landing-title">Name</h1>
         <p className="landing-tagline">
-          Cycle-aware fitness & nutrition built for women.
+          Cycle-aware fitness & nutrition
         </p>
 
         <AuthButtons />

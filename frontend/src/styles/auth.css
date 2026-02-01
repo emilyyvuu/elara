@@ -1,5 +1,13 @@
+@font-face {
+  font-family: LexendDeca;
+  src: url(../fonts/LexendDeca.ttf)
+  format("trueType");
+  font-weight: 400;
+  font-style: normal;
+}
+
 .auth-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;

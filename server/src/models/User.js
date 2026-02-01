@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
     height: { type: Number },
     weight: { type: Number },
     goals: { type: [String], default: [] },
+    dietaryNeeds: { type: [String], default: [] },
     equipment: { type: String, enum: ["Gym", "Home", "None"], default: "None" },
     cycleTracking: { type: Boolean, default: false },
     cycleDetails: { type: cycleDetailsSchema },

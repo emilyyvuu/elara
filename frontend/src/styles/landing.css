@@ -8,11 +8,6 @@
 }
 
 @font-face {
-  font-family: Absans;
-  src: url(frontend\src\fonts\Absans-Regular.otf);
-}
-
-@font-face {
   font-family: LexendDeca;
   src: url(../fonts/LexendDeca.ttf)
   format("trueType");
@@ -33,7 +28,7 @@
     rgba(142, 177, 237, 1) 100%
   );
   background-size: 260% 260%;
-  animation: landing-gradient 6s ease-in-out infinite;
+  animation: landing-gradient 3s ease-in-out infinite;
   font-family: "LexendDeca", "Libre Baskerville", Georgia, serif;
 
 }

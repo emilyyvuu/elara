@@ -4,6 +4,9 @@
 export function planPrompt(profile, checkIn) {
   const dailyPulse = checkIn ? JSON.stringify(checkIn, null, 2) : "Baseline energy; no specific symptoms reported.";
   const goals = Array.isArray(profile?.goals) ? profile.goals.join(", ") : "General wellness";
+  const dietaryNeeds = Array.isArray(profile?.dietaryNeeds) && profile.dietaryNeeds.length
+    ? profile.dietaryNeeds.join(", ")
+    : "No specific dietary needs";
   const height = profile?.height ? `${profile.height} cm/in` : "Not provided";
   const weight = profile?.weight ? `${profile.weight} kg/lbs` : "Not provided";
   const bioContext = profile?.bioContext ?? "General health focus (not cycle-syncing)";
@@ -14,6 +17,7 @@ You are an elite Women's Health & Performance Coach specializing in bio-adaptive
 
 # INPUT DATA
 - **Primary Goals:** ${goals}
+- **Dietary Needs:** ${dietaryNeeds}
 - **Physical Profile:** Height: ${height} | Weight: ${weight}
 - **Biological Context:** ${bioContext}
 - **Daily Check-in (The Pulse):** ${dailyPulse}

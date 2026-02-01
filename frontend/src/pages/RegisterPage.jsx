@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signup } from "../api/authApi";
+import { getProfile } from "../api/profileApi";
+import { isProfileComplete } from "../utils/profileCompletion";
 import "../styles/auth.css";
 
 export default function RegisterPage() {
@@ -20,7 +22,8 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     try {
       await signup(form);
-      navigate("/planner");
+      const { user } = await getProfile();
+      navigate(isProfileComplete(user) ? "/dashboard" : "/onboard");
     } catch (err) {
       setError(err?.message || "Signup failed");
     } finally {

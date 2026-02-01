@@ -1,12 +1,13 @@
 export default function PlanResults({ plan }) {
   if (!plan) return null;
 
-  // If backend returned "raw" fallback
-  if (plan.raw) {
+  const payload = plan.plan || plan;
+
+  if (payload.raw) {
     return (
       <div style={{ whiteSpace: "pre-wrap", marginTop: 16 }}>
         <h3>Raw output</h3>
-        <pre>{plan.raw}</pre>
+        <pre>{payload.raw}</pre>
       </div>
     );
   }
@@ -14,44 +15,31 @@ export default function PlanResults({ plan }) {
   return (
     <div style={{ marginTop: 16, display: "grid", gap: 16 }}>
       <div>
-        <h3>Summary</h3>
-        <p>{plan.summary}</p>
-      </div>
-
-      <div>
-        <h3>Workouts</h3>
+        <h3>Workout</h3>
+        <p><b>{payload.workout?.title}</b></p>
         <ul>
-          {plan.workouts?.map((w) => (
-            <li key={w.day}>
-              <b>Day {w.day}:</b> {w.focus} — {w.details} ({w.durationMins} mins)
-            </li>
+          {payload.workout?.exercises?.map((exercise, index) => (
+            <li key={`${exercise}-${index}`}>{exercise}</li>
           ))}
         </ul>
+        {payload.workout?.whyToday ? (
+          <p><i>{payload.workout.whyToday}</i></p>
+        ) : null}
       </div>
 
       <div>
-        <h3>Meals</h3>
+        <h3>Nutrition</h3>
+        <p><b>{payload.nutrition?.focus}</b></p>
         <ul>
-          {plan.meals?.map((m) => (
-            <li key={m.day}>
-              <b>Day {m.day}:</b> {m.breakfast} / {m.lunch} / {m.dinner} (snacks: {m.snacks})
-            </li>
-          ))}
+          <li>Breakfast: {payload.nutrition?.meals?.breakfast}</li>
+          <li>Lunch: {payload.nutrition?.meals?.lunch}</li>
+          <li>Dinner: {payload.nutrition?.meals?.dinner}</li>
         </ul>
       </div>
 
       <div>
-        <h3>Adjustments</h3>
-        <ul>
-          {plan.adjustments?.map((a, i) => <li key={i}>{a}</li>)}
-        </ul>
-      </div>
-
-      <div>
-        <h3>Safety notes</h3>
-        <ul>
-          {plan.safetyNotes?.map((s, i) => <li key={i}>{s}</li>)}
-        </ul>
+        <h3>Insight</h3>
+        <p>{payload.insight}</p>
       </div>
     </div>
   );

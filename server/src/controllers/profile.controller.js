@@ -10,9 +10,12 @@ function safeUser(user) {
  */
 function sanitizeProfileUpdate(body) {
   const update = {};
+  if (body.firstName !== undefined) update.firstName = body.firstName;
+  if (body.lastName !== undefined) update.lastName = body.lastName;
   if (body.height !== undefined) update.height = body.height;
   if (body.weight !== undefined) update.weight = body.weight;
   if (body.goals !== undefined) update.goals = body.goals;
+  if (body.dietaryNeeds !== undefined) update.dietaryNeeds = body.dietaryNeeds;
   if (body.equipment !== undefined) update.equipment = body.equipment;
   if (body.cycleTracking !== undefined) update.cycleTracking = body.cycleTracking;
   if (body.cycleDetails !== undefined) update.cycleDetails = body.cycleDetails;
@@ -24,6 +27,12 @@ function sanitizeProfileUpdate(body) {
  */
 function validateProfileUpdate(update) {
   const errors = [];
+  if (update.firstName != null && typeof update.firstName !== "string") {
+    errors.push("firstName must be a string");
+  }
+  if (update.lastName != null && typeof update.lastName !== "string") {
+    errors.push("lastName must be a string");
+  }
   if (update.height != null && typeof update.height !== "number") {
     errors.push("height must be a number");
   }
@@ -32,6 +41,9 @@ function validateProfileUpdate(update) {
   }
   if (update.goals != null && !Array.isArray(update.goals)) {
     errors.push("goals must be an array of strings");
+  }
+  if (update.dietaryNeeds != null && !Array.isArray(update.dietaryNeeds)) {
+    errors.push("dietaryNeeds must be an array of strings");
   }
   if (update.equipment != null && !["Gym", "Home", "None"].includes(update.equipment)) {
     errors.push("equipment must be Gym, Home, or None");

@@ -6,8 +6,9 @@ import { generateJson } from "./gemini.service.js";
  */
 export async function buildPlan(profile, checkIn) {
   const prompt = planPrompt(profile, checkIn);
+  const model = process.env.GEMINI_MODEL || "models/gemini-2.5-flash";
 
-  const text = await generateJson("gemini-1.5-flash", prompt);
+  const text = await generateJson(model, prompt);
 
   // Try to parse JSON safely
   const parsed = safeJsonParse(text);
