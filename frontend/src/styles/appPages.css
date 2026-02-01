@@ -233,7 +233,7 @@
 .form-grid {
   display: grid;
   gap: 0.85rem;
-  max-width: 560px;
+  max-width: 95%;
 }
 
 .form-row {

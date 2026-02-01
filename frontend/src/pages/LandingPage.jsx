@@ -4,6 +4,7 @@ import "../styles/landing.css";
 export default function LandingPage() {
   return (
     <div className="landing-container">
+      <span className="ring-layer ring-b" aria-hidden="true" />
       <div className="landing-card">
         <h1 className="landing-title">Elara</h1>
         <p className="landing-tagline">
