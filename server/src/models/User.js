@@ -25,6 +25,11 @@ const userSchema = new mongoose.Schema(
     cycleTracking: { type: Boolean, default: false },
     cycleDetails: { type: cycleDetailsSchema },
     currentPlan: { type: mongoose.Schema.Types.Mixed },
+    currentPlanVersionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PlanVersion",
+      default: null,
+    },
   },
   { timestamps: true }
 );
