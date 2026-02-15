@@ -1,6 +1,8 @@
 import User from "../models/User.js";
+import CheckIn from "../models/CheckIn.js";
 import { buildPlan } from "../services/plan.service.js";
 import { buildProfileFromUser } from "../utils/buildProfileFromUser.js";
+import { savePlanVersion } from "../services/planVersion.service.js";
 
 /**
  * Sanitize and validate check-in data.
@@ -46,10 +48,33 @@ export async function submitCheckIn(req, res) {
 
     const profile = buildProfileFromUser(user);
     const plan = await buildPlan(profile, sanitized);
-    user.currentPlan = plan;
-    await user.save();
+    const checkInRecord = await CheckIn.create({
+      userId: user._id,
+      energy: sanitized.energy,
+      mood: sanitized.mood,
+      symptoms: sanitized.symptoms,
+    });
 
-    return res.json({ plan });
+    const planVersion = await savePlanVersion({
+      user,
+      plan,
+      source: "checkin",
+      checkInSnapshot: sanitized,
+    });
+
+    return res.json({
+      plan,
+      checkIn: {
+        id: checkInRecord._id,
+        createdAt: checkInRecord.createdAt,
+      },
+      planVersion: {
+        id: planVersion._id,
+        version: planVersion.version,
+        source: planVersion.source,
+        createdAt: planVersion.createdAt,
+      },
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Failed to submit check-in" });
