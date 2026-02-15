@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../models/User.js";
 import PlanVersion from "../models/PlanVersion.js";
 import { buildPlan } from "../services/plan.service.js";
@@ -96,5 +97,41 @@ export async function listPlanHistory(req, res) {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Failed to load plan history" });
+  }
+}
+
+/**
+ * Fetch a single historical plan version owned by the authenticated user.
+ */
+export async function getPlanVersionById(req, res) {
+  try {
+    const { id } = req.params || {};
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid plan version id" });
+    }
+
+    const versionDoc = await PlanVersion.findOne({ _id: id, userId: req.userId });
+    if (!versionDoc) {
+      return res.status(404).json({ error: "Plan version not found" });
+    }
+
+    const payload = versionDoc.plan?.plan && typeof versionDoc.plan.plan === "object"
+      ? versionDoc.plan.plan
+      : versionDoc.plan;
+
+    return res.json({
+      id: versionDoc._id,
+      version: versionDoc.version,
+      source: versionDoc.source,
+      createdAt: versionDoc.createdAt,
+      whyChanged: versionDoc.whyChanged || "",
+      diffFromPrevious: versionDoc.diffFromPrevious || null,
+      checkInSnapshot: versionDoc.checkInSnapshot || null,
+      profileSnapshot: versionDoc.profileSnapshot || null,
+      plan: payload || {},
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to load plan version" });
   }
 }
