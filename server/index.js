@@ -7,6 +7,7 @@ import authRoutes from "./src/routes/auth.routes.js";
 import checkinRoutes from "./src/routes/checkin.routes.js";
 import planRoutes from "./src/routes/plan.routes.js";
 import profileRoutes from "./src/routes/profile.routes.js";
+import analyticsRoutes from "./src/routes/analytics.routes.js";
 import { authLimiter, planLimiter } from "./src/middleware/rateLimit.js";
 
 dotenv.config();
@@ -22,9 +23,11 @@ app.get("/api/health", (req, res) => res.json({ ok: true }));
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/checkin", planLimiter);
 app.use("/api/plan", planLimiter);
+app.use("/api/analytics", planLimiter);
 app.use("/api", checkinRoutes);
 app.use("/api", profileRoutes);
 app.use("/api", planRoutes);
+app.use("/api", analyticsRoutes);
 
 const PORT = process.env.PORT || 5174;
 const { MONGODB_URI } = process.env;

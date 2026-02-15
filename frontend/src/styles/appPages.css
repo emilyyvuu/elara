@@ -396,6 +396,71 @@
   gap: 1rem;
 }
 
+.analytics-filter-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: fit-content;
+}
+
+.analytics-filter-tile label {
+  font-weight: 700;
+}
+
+.analytics-filter-tile select {
+  border: 1px solid rgba(78, 91, 168, 0.35);
+  border-radius: 12px;
+  padding: 0.55rem 0.8rem;
+  background: rgba(255, 255, 255, 0.88);
+  color: #4e5ba8;
+}
+
+.analytics-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analytics-card {
+  min-height: 160px;
+}
+
+.analytics-card h3 {
+  margin-top: 0;
+}
+
+.analytics-value {
+  font-family: "Wagon", "Libre Baskerville", Georgia, serif;
+  font-size: 2rem;
+  margin: 0.35rem 0 0;
+}
+
+.analytics-symptoms h3 {
+  margin-top: 0;
+}
+
+.analytics-preview-block {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.analytics-preview-block h4 {
+  margin: 0;
+}
+
+.analytics-preview-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.analytics-preview-block .btn {
+  width: fit-content;
+  text-decoration: none;
+}
+
 @media (max-width: 720px) {
   .page-card {
     padding: 2.25rem 2rem;
@@ -433,5 +498,14 @@
 
   .history-list {
     max-height: 320px;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-filter-tile {
+    width: 100%;
+    flex-wrap: wrap;
   }
 }

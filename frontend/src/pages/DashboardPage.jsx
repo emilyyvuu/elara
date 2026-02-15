@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getProfile } from "../api/profileApi";
 import { submitCheckIn } from "../api/checkinApi";
+import { getAnalyticsSummary } from "../api/analyticsApi";
 import { isProfileComplete } from "../utils/profileCompletion";
 import LogoutButton from "../components/LogoutButton";
 import "../styles/appPages.css";
@@ -13,6 +14,22 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [checkIn, setCheckIn] = useState({ energy: 3, mood: 3, symptomsText: "" });
   const [error, setError] = useState("");
+  const [analyticsPreview, setAnalyticsPreview] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState("");
+
+  const loadAnalyticsPreview = async () => {
+    setAnalyticsLoading(true);
+    setAnalyticsError("");
+    try {
+      const data = await getAnalyticsSummary("7d");
+      setAnalyticsPreview(data?.summary || null);
+    } catch (err) {
+      setAnalyticsError(err?.message || "Failed to load analytics preview");
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -26,6 +43,7 @@ export default function DashboardPage() {
         }
         setProfile(user);
         setPlan(user.currentPlan || null);
+        await loadAnalyticsPreview();
       } catch (err) {
         navigate("/login");
       }
@@ -54,6 +72,7 @@ export default function DashboardPage() {
         symptoms,
       });
       setPlan(result.plan || null);
+      await loadAnalyticsPreview();
     } catch (err) {
       setError(err?.message || "Failed to submit check-in");
     } finally {
@@ -65,12 +84,19 @@ export default function DashboardPage() {
   const activePlan = plan?.plan || plan;
   const welcomeName = profile?.firstName || profile?.lastName || "there";
 
+  const streakDays = analyticsPreview?.currentStreakDays ?? "-";
+  const avgMood = analyticsPreview?.avgMoodLast7d ?? "-";
+  const avgEnergy = analyticsPreview?.avgEnergyLast7d ?? "-";
+
   return (
     <div className="page-container scrollable-page">
       <div className="dashboard-shell">
         <div className="dashboard-header">
           <h1 className="dashboard-title">Welcome, {welcomeName}!</h1>
           <div className="dashboard-actions">
+            <Link className="btn primary" to="/analytics">
+              Analytics
+            </Link>
             <Link className="btn primary" to="/history">
               Plan History
             </Link>
@@ -169,6 +195,21 @@ export default function DashboardPage() {
           <div className="dashboard-tile card-small insight-tile">
             <h3>Insight</h3>
             {activePlan?.insight ? <p>{activePlan.insight}</p> : <p>Awaiting your plan.</p>}
+            <div className="analytics-preview-block">
+              <h4>Your 7-day snapshot</h4>
+              {analyticsLoading ? <p>Loading snapshot...</p> : null}
+              {analyticsError ? <p className="form-error">{analyticsError}</p> : null}
+              {!analyticsLoading && !analyticsError ? (
+                <ul className="analytics-preview-list">
+                  <li>Current streak: {streakDays} day(s)</li>
+                  <li>Average mood: {avgMood}</li>
+                  <li>Average energy: {avgEnergy}</li>
+                </ul>
+              ) : null}
+              <Link className="btn primary" to="/analytics">
+                View full analytics
+              </Link>
+            </div>
           </div>
         </div>
       </div>
