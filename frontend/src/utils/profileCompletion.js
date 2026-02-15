@@ -4,7 +4,7 @@ export function isProfileComplete(user) {
   const hasGoals = Array.isArray(user.goals) && user.goals.length > 0;
   const hasEquipment = Boolean(user.equipment);
   const cycleOk = user.cycleTracking
-    ? Boolean(user.cycleDetails?.lastPeriodDate)
+    ? Boolean(user.cycleDetails?.lastPeriodDate) && Boolean(user.cycleDetails?.avgCycleLength)
     : true;
   return hasName && hasGoals && hasEquipment && cycleOk;
 }

@@ -71,6 +71,9 @@ export default function DashboardPage() {
         <div className="dashboard-header">
           <h1 className="dashboard-title">Welcome, {welcomeName}!</h1>
           <div className="dashboard-actions">
+            <Link className="btn primary" to="/history">
+              Plan History
+            </Link>
             <Link className="btn primary" to="/profile">
               Profile
             </Link>

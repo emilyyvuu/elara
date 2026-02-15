@@ -2,6 +2,26 @@ function numericOrNull(value) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function describeChangedAreas(diff) {
+  const changed = Array.isArray(diff?.changedFields) ? diff.changedFields : [];
+  const areas = [];
+
+  if (changed.some((field) => field.startsWith("workout"))) {
+    areas.push("workout recommendations");
+  }
+  if (changed.some((field) => field.startsWith("nutrition"))) {
+    areas.push("meal recommendations");
+  }
+  if (changed.some((field) => field === "insight")) {
+    areas.push("daily insight");
+  }
+
+  if (areas.length === 0) return "";
+  if (areas.length === 1) return `We updated your ${areas[0]}.`;
+  if (areas.length === 2) return `We updated your ${areas[0]} and ${areas[1]}.`;
+  return `We updated your ${areas[0]}, ${areas[1]}, and ${areas[2]}.`;
+}
+
 function describeCheckInChanges(previousCheckIn, currentCheckIn) {
   if (!currentCheckIn || typeof currentCheckIn !== "object") return null;
   if (!previousCheckIn || typeof previousCheckIn !== "object") {
@@ -45,14 +65,13 @@ export function buildWhyChanged({
   currentCheckInSnapshot,
 }) {
   const summaryParts = [];
-  const changedCount = Array.isArray(diff?.changedFields) ? diff.changedFields.length : 0;
 
   if (source === "initial") {
     summaryParts.push("Initial generated plan from baseline profile data.");
   } else if (source === "profile_update") {
-    summaryParts.push("Plan refreshed after profile settings changed.");
+    summaryParts.push("Your plan was refreshed after profile updates.");
   } else if (source === "checkin") {
-    summaryParts.push("Plan refreshed from check-in data.");
+    summaryParts.push("Your plan was refreshed from your daily check-in.");
   }
 
   const checkInReason = describeCheckInChanges(previousCheckInSnapshot, currentCheckInSnapshot);
@@ -60,10 +79,11 @@ export function buildWhyChanged({
     summaryParts.push(checkInReason);
   }
 
-  if (changedCount === 0) {
-    summaryParts.push("No major structural plan changes were detected.");
-  } else {
-    summaryParts.push(`${changedCount} plan field(s) changed from the previous version.`);
+  const changedAreaMessage = describeChangedAreas(diff);
+  if (changedAreaMessage) {
+    summaryParts.push(changedAreaMessage);
+  } else if (source !== "initial") {
+    summaryParts.push("Your plan stayed close to the previous version.");
   }
 
   return summaryParts.join(" ").trim();

@@ -24,10 +24,19 @@ const checkInSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    checkInDate: {
+      type: Date,
+      required: true,
+      index: true,
+    },
   },
   { timestamps: true }
 );
 
 checkInSchema.index({ userId: 1, createdAt: -1 });
+checkInSchema.index(
+  { userId: 1, checkInDate: 1 },
+  { unique: true, partialFilterExpression: { checkInDate: { $type: "date" } } }
+);
 
 export default mongoose.model("CheckIn", checkInSchema);

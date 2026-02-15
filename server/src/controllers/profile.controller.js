@@ -54,6 +54,33 @@ function validateProfileUpdate(update) {
   if (update.cycleDetails != null && typeof update.cycleDetails !== "object") {
     errors.push("cycleDetails must be an object");
   }
+  if (update.cycleDetails != null && typeof update.cycleDetails === "object") {
+    const { lastPeriodDate, avgCycleLength } = update.cycleDetails;
+    if (lastPeriodDate != null) {
+      const parsed = new Date(lastPeriodDate);
+      if (Number.isNaN(parsed.getTime())) {
+        errors.push("cycleDetails.lastPeriodDate must be a valid date");
+      }
+    }
+    if (
+      avgCycleLength != null &&
+      (typeof avgCycleLength !== "number" || avgCycleLength < 15 || avgCycleLength > 45)
+    ) {
+      errors.push("cycleDetails.avgCycleLength must be a number between 15 and 45");
+    }
+  }
+  if (update.cycleTracking === true) {
+    const hasLastPeriodDate = Boolean(update.cycleDetails?.lastPeriodDate);
+    const cycleLength = update.cycleDetails?.avgCycleLength;
+    const hasValidCycleLength =
+      typeof cycleLength === "number" && cycleLength >= 15 && cycleLength <= 45;
+
+    if (!hasLastPeriodDate || !hasValidCycleLength) {
+      errors.push(
+        "cycleDetails.lastPeriodDate and cycleDetails.avgCycleLength (15-45) are required when cycleTracking is enabled"
+      );
+    }
+  }
   return errors;
 }
 

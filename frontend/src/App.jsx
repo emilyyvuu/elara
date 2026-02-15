@@ -6,6 +6,7 @@ import OnboardPage from "./pages/OnboardPage";
 import PlanLoadingPage from "./pages/PlanLoadingPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
+import PlanHistoryPage from "./pages/PlanHistoryPage";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/plan-loading" element={<PlanLoadingPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/history" element={<PlanHistoryPage />} />
       </Routes>
     </BrowserRouter>
   );

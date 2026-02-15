@@ -1,28 +1,67 @@
 import mongoose from "mongoose";
 import User from "../models/User.js";
 import PlanVersion from "../models/PlanVersion.js";
+import CheckIn from "../models/CheckIn.js";
 import { buildPlan } from "../services/plan.service.js";
 import { buildProfileFromUser } from "../utils/buildProfileFromUser.js";
 import { savePlanVersion } from "../services/planVersion.service.js";
+
+function getUtcDayStart(date = new Date()) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+function getNextUtcDayStart(date = new Date()) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1));
+}
 
 /**
  * Handle generating a personalized plan based on user profile and optional check-in data.
  */
 export async function generatePlan(req, res) {
   try {
-    const { checkIn } = req.body || {};
+    const { checkIn, source: requestedSource } = req.body || {};
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const profile = buildProfileFromUser(user);
+    let effectiveCheckIn = checkIn ?? null;
 
-    const plan = await buildPlan(profile, checkIn);
-    const source = checkIn ? "checkin" : "initial";
+    if (!effectiveCheckIn) {
+      const dayStart = getUtcDayStart();
+      const nextDayStart = getNextUtcDayStart();
+      const latestTodayCheckIn = await CheckIn.findOne({
+        userId: user._id,
+        $or: [
+          { checkInDate: { $gte: dayStart, $lt: nextDayStart } },
+          { createdAt: { $gte: dayStart, $lt: nextDayStart } },
+        ],
+      })
+        .sort({ createdAt: -1 })
+        .select("energy mood symptoms");
+
+      if (latestTodayCheckIn) {
+        effectiveCheckIn = {
+          energy: latestTodayCheckIn.energy ?? null,
+          mood: latestTodayCheckIn.mood ?? null,
+          symptoms: Array.isArray(latestTodayCheckIn.symptoms)
+            ? latestTodayCheckIn.symptoms
+            : [],
+        };
+      }
+    }
+
+    const plan = await buildPlan(profile, effectiveCheckIn);
+    const allowedSources = new Set(["initial", "checkin", "profile_update"]);
+    const source = allowedSources.has(requestedSource)
+      ? requestedSource
+      : effectiveCheckIn
+        ? "checkin"
+        : "initial";
     const planVersion = await savePlanVersion({
       user,
       plan,
       source,
-      checkInSnapshot: checkIn ?? null,
+      checkInSnapshot: effectiveCheckIn,
     });
 
     return res.json({

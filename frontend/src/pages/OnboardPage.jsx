@@ -20,6 +20,7 @@ export default function OnboardPage() {
     equipment: "None",
     cycleTracking: false,
     lastPeriodDate: "",
+    avgCycleLength: "28",
   });
   const [unitSystem, setUnitSystem] = useState("metric");
 
@@ -63,6 +64,21 @@ export default function OnboardPage() {
 
     const heightValue = form.height ? Number(form.height) : null;
     const weightValue = form.weight ? Number(form.weight) : null;
+    const avgCycleLength = form.avgCycleLength ? Number(form.avgCycleLength) : null;
+
+    if (form.cycleTracking) {
+      if (!form.lastPeriodDate) {
+        setLoading(false);
+        setError("Please add your last period start date to enable cycle syncing.");
+        return;
+      }
+      if (!avgCycleLength || avgCycleLength < 15 || avgCycleLength > 45) {
+        setLoading(false);
+        setError("Average cycle length should be a number between 15 and 45 days.");
+        return;
+      }
+    }
+
     const imperialHeightInches =
       (Number(form.heightFeet) || 0) * 12 + (Number(form.heightInches) || 0);
     const height = unitSystem === "imperial"
@@ -82,7 +98,10 @@ export default function OnboardPage() {
       equipment: form.equipment,
       cycleTracking: form.cycleTracking,
       cycleDetails: form.cycleTracking
-        ? { lastPeriodDate: form.lastPeriodDate || null }
+        ? {
+          lastPeriodDate: form.lastPeriodDate || null,
+          avgCycleLength,
+        }
         : null,
     };
 
@@ -222,15 +241,28 @@ export default function OnboardPage() {
                 </select>
               </div>
               {form.cycleTracking ? (
-                <div className="form-row">
-                  <label htmlFor="lastPeriodDate">Last period start date</label>
-                  <input
-                    id="lastPeriodDate"
-                    type="date"
-                    value={form.lastPeriodDate}
-                    onChange={(e) => update("lastPeriodDate", e.target.value)}
-                  />
-                </div>
+                <>
+                  <div className="form-row">
+                    <label htmlFor="lastPeriodDate">Last period start date</label>
+                    <input
+                      id="lastPeriodDate"
+                      type="date"
+                      value={form.lastPeriodDate}
+                      onChange={(e) => update("lastPeriodDate", e.target.value)}
+                    />
+                  </div>
+                  <div className="form-row">
+                    <label htmlFor="avgCycleLength">Average cycle length (days)</label>
+                    <input
+                      id="avgCycleLength"
+                      type="number"
+                      min="15"
+                      max="45"
+                      value={form.avgCycleLength}
+                      onChange={(e) => update("avgCycleLength", e.target.value)}
+                    />
+                  </div>
+                </>
               ) : null}
             </>
           ) : null}

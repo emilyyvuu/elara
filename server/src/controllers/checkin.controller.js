@@ -4,6 +4,14 @@ import { buildPlan } from "../services/plan.service.js";
 import { buildProfileFromUser } from "../utils/buildProfileFromUser.js";
 import { savePlanVersion } from "../services/planVersion.service.js";
 
+function getUtcDayStart(date = new Date()) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+function getNextUtcDayStart(date = new Date()) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1));
+}
+
 /**
  * Sanitize and validate check-in data.
  */
@@ -45,6 +53,21 @@ export async function submitCheckIn(req, res) {
 
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
+    const dayStart = getUtcDayStart();
+    const nextDayStart = getNextUtcDayStart();
+
+    const existingToday = await CheckIn.findOne({
+      userId: user._id,
+      $or: [
+        { checkInDate: { $gte: dayStart, $lt: nextDayStart } },
+        { createdAt: { $gte: dayStart, $lt: nextDayStart } },
+      ],
+    });
+    if (existingToday) {
+      return res.status(409).json({
+        error: "You already submitted a check-in today. You can submit another one tomorrow.",
+      });
+    }
 
     const profile = buildProfileFromUser(user);
     const plan = await buildPlan(profile, sanitized);
@@ -53,6 +76,7 @@ export async function submitCheckIn(req, res) {
       energy: sanitized.energy,
       mood: sanitized.mood,
       symptoms: sanitized.symptoms,
+      checkInDate: dayStart,
     });
 
     const planVersion = await savePlanVersion({
@@ -76,6 +100,11 @@ export async function submitCheckIn(req, res) {
       },
     });
   } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(409).json({
+        error: "You already submitted a check-in today. You can submit another one tomorrow.",
+      });
+    }
     console.error(err);
     return res.status(500).json({ error: "Failed to submit check-in" });
   }

@@ -10,6 +10,9 @@ export function planPrompt(profile, checkIn) {
   const height = profile?.height ? `${profile.height} cm/in` : "Not provided";
   const weight = profile?.weight ? `${profile.weight} kg/lbs` : "Not provided";
   const bioContext = profile?.bioContext ?? "General health focus (not cycle-syncing)";
+  const cyclePhase = profile?.cyclePhase || "Not available";
+  const cycleDay = profile?.cycleDay || "Not available";
+  const avgCycleLength = profile?.cycleDetails?.avgCycleLength || "Not available";
 
   return `
 # ROLE
@@ -20,6 +23,9 @@ You are an elite Women's Health & Performance Coach specializing in bio-adaptive
 - **Dietary Needs:** ${dietaryNeeds}
 - **Physical Profile:** Height: ${height} | Weight: ${weight}
 - **Biological Context:** ${bioContext}
+- **Cycle Phase:** ${cyclePhase}
+- **Cycle Day:** ${cycleDay}
+- **Average Cycle Length:** ${avgCycleLength}
 - **Daily Check-in (The Pulse):** ${dailyPulse}
 
 # TASK

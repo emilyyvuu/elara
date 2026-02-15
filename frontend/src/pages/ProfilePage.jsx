@@ -8,15 +8,19 @@ import "../styles/appPages.css";
 export default function ProfilePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [unitSystem, setUnitSystem] = useState("metric");
   const [form, setForm] = useState({
     fullName: "",
     height: "",
     weight: "",
+    heightFeet: "",
+    heightInches: "",
     goalsText: "",
     dietaryNeedsText: "",
     equipment: "None",
     cycleTracking: false,
     lastPeriodDate: "",
+    avgCycleLength: "28",
   });
   const [status, setStatus] = useState("");
 
@@ -39,6 +43,11 @@ export default function ProfilePage() {
           lastPeriodDate: user.cycleDetails?.lastPeriodDate
             ? String(user.cycleDetails.lastPeriodDate).slice(0, 10)
             : "",
+          avgCycleLength: user.cycleDetails?.avgCycleLength
+            ? String(user.cycleDetails.avgCycleLength)
+            : "28",
+          heightFeet: "",
+          heightInches: "",
         });
       } catch (err) {
         navigate("/login");
@@ -52,6 +61,31 @@ export default function ProfilePage() {
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
+  const toggleUnits = () => {
+    setForm((prev) => {
+      if (unitSystem === "metric") {
+        const totalInches = prev.height ? Number(prev.height) / 2.54 : 0;
+        const feet = Math.floor(totalInches / 12);
+        const inches = totalInches ? (totalInches % 12).toFixed(1) : "";
+        const weightLb = prev.weight ? (Number(prev.weight) * 2.20462).toFixed(1) : "";
+        return {
+          ...prev,
+          heightFeet: totalInches ? String(feet) : "",
+          heightInches: inches,
+          weight: weightLb,
+        };
+      }
+
+      const feet = Number(prev.heightFeet) || 0;
+      const inches = Number(prev.heightInches) || 0;
+      const heightCm = feet || inches ? ((feet * 12 + inches) * 2.54).toFixed(1) : "";
+      const weightKg = prev.weight ? (Number(prev.weight) / 2.20462).toFixed(1) : "";
+      return { ...prev, height: heightCm, weight: weightKg };
+    });
+
+    setUnitSystem((prev) => (prev === "metric" ? "imperial" : "metric"));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -64,24 +98,52 @@ export default function ProfilePage() {
       .split(",")
       .map((g) => g.trim())
       .filter(Boolean);
+    const weightValue = form.weight ? Number(form.weight) : null;
+    const imperialHeightInches =
+      (Number(form.heightFeet) || 0) * 12 + (Number(form.heightInches) || 0);
+    const avgCycleLength = form.avgCycleLength ? Number(form.avgCycleLength) : null;
+
+    if (form.cycleTracking) {
+      if (!form.lastPeriodDate) {
+        setLoading(false);
+        setStatus("Please add your last period start date to keep cycle sync enabled.");
+        return;
+      }
+      if (!avgCycleLength || avgCycleLength < 15 || avgCycleLength > 45) {
+        setLoading(false);
+        setStatus("Average cycle length should be a number between 15 and 45 days.");
+        return;
+      }
+    }
 
     const payload = {
       firstName: firstName || "",
       lastName,
-      height: form.height ? Number(form.height) : null,
-      weight: form.weight ? Number(form.weight) : null,
+      height: unitSystem === "imperial"
+        ? imperialHeightInches
+          ? Number((imperialHeightInches * 2.54).toFixed(1))
+          : null
+        : form.height
+          ? Number(form.height)
+          : null,
+      weight: unitSystem === "imperial" && weightValue != null
+        ? Number((weightValue / 2.20462).toFixed(1))
+        : weightValue,
       goals,
       dietaryNeeds,
       equipment: form.equipment,
       cycleTracking: form.cycleTracking,
       cycleDetails: form.cycleTracking
-        ? { lastPeriodDate: form.lastPeriodDate || null }
+        ? {
+          lastPeriodDate: form.lastPeriodDate || null,
+          avgCycleLength,
+        }
         : null,
     };
 
     try {
       await updateProfile(payload);
-      await generatePlan(null);
+      await generatePlan(null, "profile_update");
       setStatus("Profile updated. Plan refreshed.");
     } catch (err) {
       setStatus(err?.message || "Failed to update profile");
@@ -112,16 +174,49 @@ export default function ProfilePage() {
             />
           </div>
           <div className="form-row">
-            <label htmlFor="height">Height (cm)</label>
-            <input
-              id="height"
-              type="number"
-              value={form.height}
-              onChange={(e) => update("height", e.target.value)}
-            />
+            <label className="label-row">
+              Height ({unitSystem === "metric" ? "cm" : "ft / in"})
+              <span className="toggle-switch">
+                <span>cm/kg</span>
+                <input
+                  type="checkbox"
+                  checked={unitSystem === "imperial"}
+                  onChange={toggleUnits}
+                />
+                <span className="toggle-track">
+                  <span className="toggle-thumb" />
+                </span>
+                <span>ft/lb</span>
+              </span>
+            </label>
+            {unitSystem === "metric" ? (
+              <input
+                id="height"
+                type="number"
+                value={form.height}
+                onChange={(e) => update("height", e.target.value)}
+              />
+            ) : (
+              <div style={{ display: "flex", gap: "0.75rem" }}>
+                <input
+                  id="heightFeet"
+                  type="number"
+                  placeholder="ft"
+                  value={form.heightFeet}
+                  onChange={(e) => update("heightFeet", e.target.value)}
+                />
+                <input
+                  id="heightInches"
+                  type="number"
+                  placeholder="in"
+                  value={form.heightInches}
+                  onChange={(e) => update("heightInches", e.target.value)}
+                />
+              </div>
+            )}
           </div>
           <div className="form-row">
-            <label htmlFor="weight">Weight (kg)</label>
+            <label htmlFor="weight">Weight ({unitSystem === "metric" ? "kg" : "lb"})</label>
             <input
               id="weight"
               type="number"
@@ -169,15 +264,28 @@ export default function ProfilePage() {
             </select>
           </div>
           {form.cycleTracking ? (
-            <div className="form-row">
-              <label htmlFor="lastPeriodDate">Last period start date</label>
-              <input
-                id="lastPeriodDate"
-                type="date"
-                value={form.lastPeriodDate}
-                onChange={(e) => update("lastPeriodDate", e.target.value)}
-              />
-            </div>
+            <>
+              <div className="form-row">
+                <label htmlFor="lastPeriodDate">Last period start date</label>
+                <input
+                  id="lastPeriodDate"
+                  type="date"
+                  value={form.lastPeriodDate}
+                  onChange={(e) => update("lastPeriodDate", e.target.value)}
+                />
+              </div>
+              <div className="form-row">
+                <label htmlFor="avgCycleLength">Average cycle length (days)</label>
+                <input
+                  id="avgCycleLength"
+                  type="number"
+                  min="15"
+                  max="45"
+                  value={form.avgCycleLength}
+                  onChange={(e) => update("avgCycleLength", e.target.value)}
+                />
+              </div>
+            </>
           ) : null}
           {status ? <p>{status}</p> : null}
           <div className="form-actions">
