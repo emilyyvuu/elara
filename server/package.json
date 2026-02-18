@@ -5,7 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node index.js"
+    "dev": "node index.js",
+    "build": "node --check index.js",
+    "lint": "node ./scripts/lint.mjs",
+    "test": "node --test --experimental-test-isolation=none"
   },
   "keywords": [],
   "author": "",
