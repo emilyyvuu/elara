@@ -16,8 +16,19 @@ function parseOrigins(value) {
   if (!value || typeof value !== "string") return [];
   return value
     .split(",")
-    .map((origin) => origin.trim())
+    .map((origin) => normalizeOrigin(origin))
     .filter(Boolean);
+}
+
+function normalizeOrigin(value) {
+  if (!value || typeof value !== "string") return "";
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  try {
+    return new URL(trimmed).origin;
+  } catch {
+    return trimmed.replace(/\/+$/, "");
+  }
 }
 
 function allowedOriginsFromEnv() {
@@ -35,6 +46,8 @@ function allowedOriginsFromEnv() {
 const allowedOrigins = new Set(allowedOriginsFromEnv());
 
 const app = express();
+// Render terminates TLS at a proxy and forwards client IP headers.
+app.set("trust proxy", 1);
 app.use(express.json());
 
 app.use(
@@ -43,7 +56,8 @@ app.use(
     origin(origin, callback) {
       // Allow non-browser clients (e.g. curl, uptime checks) with no Origin header.
       if (!origin) return callback(null, true);
-      if (allowedOrigins.has(origin)) return callback(null, true);
+      const normalizedOrigin = normalizeOrigin(origin);
+      if (allowedOrigins.has(normalizedOrigin)) return callback(null, true);
       return callback(new Error("Not allowed by CORS"));
     },
   })
