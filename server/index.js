@@ -12,10 +12,42 @@ import { authLimiter, planLimiter } from "./src/middleware/rateLimit.js";
 
 dotenv.config();
 
+function parseOrigins(value) {
+  if (!value || typeof value !== "string") return [];
+  return value
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+function allowedOriginsFromEnv() {
+  const configured = parseOrigins(process.env.CORS_ORIGINS);
+  if (configured.length > 0) return configured;
+
+  // Dev fallback keeps local setup simple while forcing explicit config in production.
+  if (process.env.NODE_ENV !== "production") {
+    return ["http://localhost:5173", "http://127.0.0.1:5173"];
+  }
+
+  return [];
+}
+
+const allowedOrigins = new Set(allowedOriginsFromEnv());
+
 const app = express();
 app.use(express.json());
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(
+  cors({
+    credentials: true,
+    origin(origin, callback) {
+      // Allow non-browser clients (e.g. curl, uptime checks) with no Origin header.
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.has(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+  })
+);
 app.use(cookieParser());
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));

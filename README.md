@@ -40,6 +40,7 @@ GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=models/gemini-2.5-flash
 PORT=5174
 NODE_ENV=development
+CORS_ORIGINS=http://localhost:5173
 ```
 
 ### 3) Run the app
