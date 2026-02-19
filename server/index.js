@@ -14,21 +14,39 @@ dotenv.config();
 
 function parseOrigins(value) {
   if (!value || typeof value !== "string") return [];
+  const trimmed = value.trim();
+  if (!trimmed) return [];
+  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.map((origin) => normalizeOrigin(origin)).filter(Boolean);
+      }
+    } catch {
+      // Fall back to delimiter parsing below.
+    }
+  }
   return value
-    .split(",")
+    .split(/[,\n]/)
     .map((origin) => normalizeOrigin(origin))
     .filter(Boolean);
 }
 
 function normalizeOrigin(value) {
   if (!value || typeof value !== "string") return "";
-  const trimmed = value.trim();
+  const trimmed = value.trim().replace(/^['"]|['"]$/g, "");
   if (!trimmed) return "";
+  if (trimmed.includes("*")) return trimmed.replace(/\/+$/, "");
   try {
     return new URL(trimmed).origin;
   } catch {
     return trimmed.replace(/\/+$/, "");
   }
+}
+
+function wildcardToRegex(pattern) {
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`^${escaped.replace(/\\\*/g, ".*")}$`);
 }
 
 function allowedOriginsFromEnv() {
@@ -43,7 +61,11 @@ function allowedOriginsFromEnv() {
   return [];
 }
 
-const allowedOrigins = new Set(allowedOriginsFromEnv());
+const configuredOrigins = allowedOriginsFromEnv();
+const allowedOrigins = new Set(configuredOrigins.filter((origin) => !origin.includes("*")));
+const allowedOriginRegexes = configuredOrigins
+  .filter((origin) => origin.includes("*"))
+  .map((pattern) => wildcardToRegex(pattern));
 
 const app = express();
 // Render terminates TLS at a proxy and forwards client IP headers.
@@ -58,6 +80,10 @@ app.use(
       if (!origin) return callback(null, true);
       const normalizedOrigin = normalizeOrigin(origin);
       if (allowedOrigins.has(normalizedOrigin)) return callback(null, true);
+      if (allowedOriginRegexes.some((regex) => regex.test(normalizedOrigin))) return callback(null, true);
+      console.warn(
+        `[CORS] Blocked origin="${normalizedOrigin}" allowed=${JSON.stringify(configuredOrigins)}`
+      );
       return callback(new Error("Not allowed by CORS"));
     },
   })
@@ -87,6 +113,7 @@ async function start() {
   try {
     await mongoose.connect(MONGODB_URI);
     console.log("MongoDB connected");
+    console.log(`[CORS] Allowed origins: ${JSON.stringify(configuredOrigins)}`);
     app.listen(PORT, () => console.log(`Backend on http://localhost:${PORT}`));
   } catch (err) {
     console.error("MongoDB connection failed", err);
