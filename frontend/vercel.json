@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://elara-5lkm.onrender.com"
+      "destination": "https://elara-5lkm.onrender.com/api/:path*"
     },
     {
       "source": "/:path*",
